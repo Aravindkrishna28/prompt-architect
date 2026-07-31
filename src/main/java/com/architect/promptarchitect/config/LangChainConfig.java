@@ -22,7 +22,7 @@ public class LangChainConfig {
         return OllamaChatModel.builder()
                 .baseUrl(baseUrl)
                 .modelName(modelName)
-                .timeout(Duration.ofSeconds(120)) // local models are slower than a hosted API
+                .timeout(Duration.ofSeconds(300)) // was 120 — cold model loads can take minutes
                 .build();
     }
 }
