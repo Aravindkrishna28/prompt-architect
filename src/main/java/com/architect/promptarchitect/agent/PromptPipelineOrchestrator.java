@@ -1,6 +1,7 @@
 package com.architect.promptarchitect.agent;
 
 import com.architect.promptarchitect.model.*;
+import com.architect.promptarchitect.service.PersistenceService;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,17 +14,20 @@ public class PromptPipelineOrchestrator {
     private final PromptStrategySelector strategySelector;
     private final PromptArchitectAgent promptArchitectAgent;
     private final EvaluatorAgent evaluatorAgent;
+    private final PersistenceService persistenceService;
 
     public PromptPipelineOrchestrator(IntentAnalyzerAgent intentAnalyzerAgent,
-                                       TaskClassifierAgent taskClassifierAgent,
-                                       PromptStrategySelector strategySelector,
-                                       PromptArchitectAgent promptArchitectAgent,
-                                       EvaluatorAgent evaluatorAgent) {
+                                      TaskClassifierAgent taskClassifierAgent,
+                                      PromptStrategySelector strategySelector,
+                                      PromptArchitectAgent promptArchitectAgent,
+                                      EvaluatorAgent evaluatorAgent,
+                                      PersistenceService persistenceService) {
         this.intentAnalyzerAgent = intentAnalyzerAgent;
         this.taskClassifierAgent = taskClassifierAgent;
         this.strategySelector = strategySelector;
         this.promptArchitectAgent = promptArchitectAgent;
         this.evaluatorAgent = evaluatorAgent;
+        this.persistenceService = persistenceService;
     }
 
     public PipelineResult run(String rawIdea) {
@@ -44,9 +48,13 @@ public class PromptPipelineOrchestrator {
             attempts++;
         }
 
-        return new PipelineResult(
+        PipelineResult result = new PipelineResult(
                 rawIdea, intent, classification, strategy, finalPrompt, finalScore,
                 attempts > 0 ? "refined after " + attempts + " attempt(s)" : "no refinement needed"
         );
+
+        persistenceService.save(result);
+
+        return result;
     }
 }

@@ -18,6 +18,8 @@ Thumbs.db
 # Logs
 *.log
 
+data/
+
 # Environment / secrets
 .env
 "@ | Out-File -Encoding utf8 .gitignore

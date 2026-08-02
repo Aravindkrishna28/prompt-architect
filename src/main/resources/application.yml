@@ -8,3 +8,14 @@ ollama:
 logging:
   level:
     dev.langchain4j: DEBUG
+
+spring:
+  datasource:
+    url: jdbc:h2:file:./data/promptarchitect
+    driver-class-name: org.h2.Driver
+    username: Aravind
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
