@@ -1,6 +1,7 @@
 package com.architect.promptarchitect.controller;
 
 import com.architect.promptarchitect.agent.IntentAnalyzerAgent;
+import com.architect.promptarchitect.agent.PromptArchitectAgent;
 import com.architect.promptarchitect.agent.PromptStrategySelector;
 import com.architect.promptarchitect.agent.TaskClassifierAgent;
 import com.architect.promptarchitect.model.*;
@@ -14,13 +15,16 @@ public class PromptArchitectController {
     private final IntentAnalyzerAgent intentAnalyzerAgent;
     private final TaskClassifierAgent taskClassifierAgent;
     private final PromptStrategySelector strategySelector;
+    private final PromptArchitectAgent promptArchitectAgent;
 
     public PromptArchitectController(IntentAnalyzerAgent intentAnalyzerAgent,
                                      TaskClassifierAgent taskClassifierAgent,
-                                     PromptStrategySelector strategySelector) {
+                                     PromptStrategySelector strategySelector,
+                                     PromptArchitectAgent promptArchitectAgent) {
         this.intentAnalyzerAgent = intentAnalyzerAgent;
         this.taskClassifierAgent = taskClassifierAgent;
         this.strategySelector = strategySelector;
+        this.promptArchitectAgent = promptArchitectAgent;
     }
 
     @PostMapping("/analyze")
@@ -28,6 +32,7 @@ public class PromptArchitectController {
         IntentAnalysis intent = intentAnalyzerAgent.run(input.idea());
         TaskClassification classification = taskClassifierAgent.run(input.idea(), intent);
         PromptStrategy strategy = strategySelector.select(classification, intent);
-        return new PipelineResult(input.idea(), intent, classification, strategy, null, null, null);
+        ArchitectedPrompt architectedPrompt = promptArchitectAgent.run(intent, classification, strategy);
+        return new PipelineResult(input.idea(), intent, classification, strategy, architectedPrompt, null, null);
     }
 }
