@@ -22,7 +22,9 @@ public class LangChainConfig {
         return OllamaChatModel.builder()
                 .baseUrl(baseUrl)
                 .modelName(modelName)
-                .timeout(Duration.ofSeconds(300)) // was 120 — cold model loads can take minutes
+                .timeout(Duration.ofSeconds(300))
+                .logRequests(true)
+                .logResponses(true)
                 .build();
     }
 }
