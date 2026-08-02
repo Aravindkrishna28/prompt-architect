@@ -19,6 +19,6 @@ public class IntentAnalyzerAgent {
         if (rawIdea == null || rawIdea.isBlank()) {
             throw new IllegalArgumentException("rawIdea must not be blank");
         }
-        return assistant.analyze(rawIdea);
+        return RetryHelper.withRetry("IntentAnalyzer", () -> assistant.analyze(rawIdea));
     }
 }

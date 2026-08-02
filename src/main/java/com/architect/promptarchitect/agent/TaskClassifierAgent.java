@@ -17,6 +17,7 @@ public class TaskClassifierAgent {
     }
 
     public TaskClassification run(String rawIdea, IntentAnalysis intent) {
-        return assistant.classify(rawIdea, intent.primaryGoal(), intent.domainHint());
+        return RetryHelper.withRetry("TaskClassifier",
+                () -> assistant.classify(rawIdea, intent.primaryGoal(), intent.domainHint()));
     }
 }

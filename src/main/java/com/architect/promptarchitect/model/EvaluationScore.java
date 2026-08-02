@@ -10,3 +10,4 @@ public record EvaluationScore(
     public boolean needsRefinement() {
         return overallScore < 7.0;
     }
+}

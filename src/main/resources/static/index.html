@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Architect</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #1a1d27;
+    --border: #2a2e3a;
+    --text: #e4e6eb;
+    --muted: #8b8fa3;
+    --accent: #6c5ce7;
+    --accent-hover: #7d6ef0;
+    --good: #2ecc71;
+    --warn: #f39c12;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, Segoe UI, Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 16px;
+  }
+  .container { max-width: 820px; margin: 0 auto; }
+  h1 { font-size: 24px; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); margin-bottom: 24px; font-size: 14px; }
+  textarea {
+    width: 100%;
+    min-height: 90px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 14px;
+    font-size: 15px;
+    resize: vertical;
+    font-family: inherit;
+  }
+  textarea:focus { outline: none; border-color: var(--accent); }
+  button {
+    margin-top: 12px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  button:hover:not(:disabled) { background: var(--accent-hover); }
+  button:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 14px;
+    display: none;
+  }
+  .status.active { display: flex; align-items: center; gap: 10px; }
+  .spinner {
+    width: 16px; height: 16px;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .results { margin-top: 28px; display: none; }
+  .results.active { display: block; }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .card h3 {
+    margin: 0 0 10px 0;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--muted);
+  }
+  .card p { margin: 6px 0; font-size: 14.5px; line-height: 1.5; }
+  .badge {
+    display: inline-block;
+    background: rgba(108,92,231,0.15);
+    color: var(--accent-hover);
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    margin-right: 6px;
+  }
+  .final-prompt {
+    background: #12141c;
+    border: 1px solid var(--accent);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-top: 8px;
+    position: relative;
+  }
+  .final-prompt pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-family: inherit;
+    font-size: 14.5px;
+    line-height: 1.6;
+    margin: 0;
+  }
+  .copy-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: var(--border);
+    color: var(--text);
+    font-size: 12px;
+    padding: 6px 12px;
+    margin: 0;
+  }
+  .score {
+    font-size: 28px;
+    font-weight: 700;
+  }
+  .score.good { color: var(--good); }
+  .score.warn { color: var(--warn); }
+  .error {
+    background: rgba(231,76,60,0.1);
+    border: 1px solid #e74c3c;
+    color: #ff8a80;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin-top: 16px;
+    display: none;
+    font-size: 14px;
+  }
+  .error.active { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🧭 Prompt Architect</h1>
+  <div class="subtitle">Turn a crude idea into a structured, optimized prompt.</div>
+
+  <textarea id="idea" placeholder="e.g. build a react dashboard for tracking crypto prices, must be mobile friendly"></textarea>
+  <br>
+  <button id="submitBtn" onclick="analyze()">Generate Prompt</button>
+
+  <div class="status" id="status">
+    <div class="spinner"></div>
+    <span id="statusText">Running pipeline... this can take a few minutes on local models.</span>
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <div class="results" id="results">
+
+    <div class="card">
+      <h3>Intent Analysis</h3>
+      <p id="intentGoal"></p>
+      <p><span class="badge" id="intentComplexity"></span><span class="badge" id="intentDomain"></span></p>
+    </div>
+
+    <div class="card">
+      <h3>Classification & Strategy</h3>
+      <p id="classDomain"></p>
+      <p><span class="badge" id="strategyTechnique"></span></p>
+      <p id="strategyRationale" style="color: var(--muted); font-size: 13.5px;"></p>
+    </div>
+
+    <div class="card">
+      <h3>Evaluation Score</h3>
+      <p class="score" id="evalScore"></p>
+      <p id="evalFeedback" style="color: var(--muted);"></p>
+      <p id="refinementInfo" style="font-size: 13px; color: var(--muted);"></p>
+    </div>
+
+    <div class="final-prompt">
+      <button class="copy-btn" onclick="copyPrompt()">Copy</button>
+      <h3 style="color: var(--accent-hover);">Final Optimized Prompt</h3>
+      <pre id="finalPrompt"></pre>
+    </div>
+
+  </div>
+</div>
+
+<script>
+async function analyze() {
+  const idea = document.getElementById('idea').value.trim();
+  if (idea.length < 5) {
+    showError('Please enter at least 5 characters describing your idea.');
+    return;
+  }
+
+  const btn = document.getElementById('submitBtn');
+  const status = document.getElementById('status');
+  const results = document.getElementById('results');
+  const error = document.getElementById('error');
+
+  btn.disabled = true;
+  status.classList.add('active');
+  results.classList.remove('active');
+  error.classList.remove('active');
+
+  try {
+    const response = await fetch('/api/v1/prompt-architect/analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ idea })
+    });
+
+    if (!response.ok) {
+      const errBody = await response.json().catch(() => null);
+      throw new Error(errBody?.idea || `Server returned ${response.status}`);
+    }
+
+    const data = await response.json();
+    renderResults(data);
+    results.classList.add('active');
+  } catch (err) {
+    showError('Failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    status.classList.remove('active');
+  }
+}
+
+function renderResults(data) {
+  document.getElementById('intentGoal').textContent = data.intentAnalysis.primaryGoal;
+  document.getElementById('intentComplexity').textContent = data.intentAnalysis.complexity;
+  document.getElementById('intentDomain').textContent = data.intentAnalysis.domainHint;
+
+  document.getElementById('classDomain').textContent =
+    data.taskClassification.domain + ' — ' + data.taskClassification.subtype;
+  document.getElementById('strategyTechnique').textContent = data.strategy.primaryTechnique;
+  document.getElementById('strategyRationale').textContent = data.strategy.rationale;
+
+  const scoreEl = document.getElementById('evalScore');
+  scoreEl.textContent = data.evaluation.overallScore.toFixed(1) + ' / 10';
+  scoreEl.className = 'score ' + (data.evaluation.overallScore >= 7 ? 'good' : 'warn');
+  document.getElementById('evalFeedback').textContent = data.evaluation.feedback;
+  document.getElementById('refinementInfo').textContent = data.refinedPrompt;
+
+  document.getElementById('finalPrompt').textContent = data.architectedPrompt.fullAssembledPrompt;
+}
+
+function copyPrompt() {
+  const text = document.getElementById('finalPrompt').textContent;
+  navigator.clipboard.writeText(text);
+  const btn = document.querySelector('.copy-btn');
+  const original = btn.textContent;
+  btn.textContent = 'Copied!';
+  setTimeout(() => btn.textContent = original, 1500);
+}
+
+function showError(msg) {
+  const error = document.getElementById('error');
+  error.textContent = msg;
+  error.classList.add('active');
+}
+
+document.getElementById('idea').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && e.ctrlKey) analyze();
+});
+</script>
+</body>
+</html>

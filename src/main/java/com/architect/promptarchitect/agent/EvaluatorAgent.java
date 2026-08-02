@@ -17,6 +17,6 @@ public class EvaluatorAgent {
     }
 
     public EvaluationScore run(ArchitectedPrompt prompt) {
-        return assistant.evaluate(prompt.fullAssembledPrompt());
+        return RetryHelper.withRetry("Evaluator", () -> assistant.evaluate(prompt.fullAssembledPrompt()));
     }
 }

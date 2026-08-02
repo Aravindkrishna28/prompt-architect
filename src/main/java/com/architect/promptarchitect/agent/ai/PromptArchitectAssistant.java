@@ -15,10 +15,13 @@ public interface PromptArchitectAssistant {
             - constraints: the constraint list, cleaned up and de-duplicated.
             - outputFormat: a clear spec of the expected output structure.
             - fullAssembledPrompt: the persona, task description, constraints, and output format combined into one ready-to-use prompt text.
-            CRITICAL FORMATTING RULE: every field must be valid JSON string content. Do NOT use literal line
-            breaks inside any string value, even when listing multiple steps or points — write everything as a
-            single continuous line of text, using semicolons or numbered phrases separated by spaces (e.g.
-            "1. Do X; 2. Do Y; 3. Do Z") instead of putting each item on its own line.
+            CRITICAL FORMATTING RULES:
+            1. Every field must be valid JSON string content. Do NOT use literal line breaks inside any
+               string value, even when listing multiple steps or points — write everything as a single
+               continuous line of text, using semicolons or numbered phrases separated by spaces (e.g.
+               "1. Do X; 2. Do Y; 3. Do Z") instead of putting each item on its own line.
+            2. Respond with ONLY the raw JSON object — no preamble, no explanation, no text before or
+               after it, no markdown code fences. Your entire response must start with { and end with }.
             """)
     @UserMessage("""
             Primary goal: {{goal}}
@@ -39,10 +42,13 @@ public interface PromptArchitectAssistant {
             Keep everything that already works well; fix only what the feedback calls out.
             Return the same structured fields as before (systemPersona, taskDescription, constraints,
             outputFormat, fullAssembledPrompt) for the IMPROVED prompt.
-            CRITICAL FORMATTING RULE: every field must be valid JSON string content. Do NOT use literal line
-            breaks inside any string value, even when listing multiple steps or points — write everything as a
-            single continuous line of text, using semicolons or numbered phrases separated by spaces (e.g.
-            "1. Do X; 2. Do Y; 3. Do Z") instead of putting each item on its own line.
+            CRITICAL FORMATTING RULES:
+            1. Every field must be valid JSON string content. Do NOT use literal line breaks inside any
+               string value, even when listing multiple steps or points — write everything as a single
+               continuous line of text, using semicolons or numbered phrases separated by spaces (e.g.
+               "1. Do X; 2. Do Y; 3. Do Z") instead of putting each item on its own line.
+            2. Respond with ONLY the raw JSON object — no preamble, no explanation, no text before or
+               after it, no markdown code fences. Your entire response must start with { and end with }.
             """)
     @UserMessage("""
             Original prompt:

@@ -23,17 +23,18 @@ public class PromptArchitectAgent {
                 .map(Enum::name)
                 .collect(Collectors.joining(", "));
 
-        return assistant.architect(
+        return RetryHelper.withRetry("PromptArchitect", () -> assistant.architect(
                 intent.primaryGoal(),
                 classification.domain().name(),
                 classification.subtype(),
                 constraintsCsv.isBlank() ? "none specified" : constraintsCsv,
                 strategy.primaryTechnique().name(),
                 supportingCsv.isBlank() ? "none" : supportingCsv
-        );
+        ));
     }
 
     public ArchitectedPrompt refine(ArchitectedPrompt previous, String feedback) {
-        return assistant.refine(previous.fullAssembledPrompt(), feedback);
+        return RetryHelper.withRetry("PromptArchitectRefine",
+                () -> assistant.refine(previous.fullAssembledPrompt(), feedback));
     }
 }
